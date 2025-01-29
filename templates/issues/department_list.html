@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Departments{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Departments</h1>
+        {% if user.is_staff %}
+            <a href="{% url 'department-create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add New Department
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Head of Department</th>
+                            <th>Number of Courses</th>
+                            <th>Number of Lecturers</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for department in departments %}
+                        <tr>
+                            <td>{{ department.code }}</td>
+                            <td>{{ department.name }}</td>
+                            <td>
+                                {% if department.head_of_department %}
+                                    {{ department.head_of_department.get_full_name }}
+                                {% else %}
+                                    <span class="text-muted">Not assigned</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ department.courses.count }}</td>
+                            <td>{{ department.lecturers.count }}</td>
+                            <td>
+                                <a href="{% url 'department-detail' department.pk %}" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if user.is_staff %}
+                                    <a href="{% url 'department-update' department.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No departments found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

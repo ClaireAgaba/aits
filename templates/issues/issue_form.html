@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Edit Issue
+    {% else %}
+        New Issue
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        {% if form.instance.pk %}
+                            <i class="fas fa-edit me-2"></i>Edit Issue
+                        {% else %}
+                            <i class="fas fa-plus me-2"></i>New Issue
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                {% if form.instance.pk %}
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                {% else %}
+                                    <i class="fas fa-plus me-2"></i>Create Issue
+                                {% endif %}
+                            </button>
+                            <a href="{% url 'issue-list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

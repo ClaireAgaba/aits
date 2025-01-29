@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Issues{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All</option>
+                        <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="in_progress" {% if request.GET.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                        <option value="resolved" {% if request.GET.status == 'resolved' %}selected{% endif %}>Resolved</option>
+                        <option value="closed" {% if request.GET.status == 'closed' %}selected{% endif %}>Closed</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Priority</label>
+                    <select name="priority" class="form-select">
+                        <option value="">All</option>
+                        <option value="low" {% if request.GET.priority == 'low' %}selected{% endif %}>Low</option>
+                        <option value="medium" {% if request.GET.priority == 'medium' %}selected{% endif %}>Medium</option>
+                        <option value="high" {% if request.GET.priority == 'high' %}selected{% endif %}>High</option>
+                        <option value="urgent" {% if request.GET.priority == 'urgent' %}selected{% endif %}>Urgent</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Category</label>
+                    <select name="category" class="form-select">
+                        <option value="">All</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"i" %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-2"></i>Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Issues List -->
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-clipboard-list me-2"></i>Issues
+            </h5>
+            <a href="{% url 'issue-create' %}" class="btn btn-light">
+                <i class="fas fa-plus me-2"></i>New Issue
+            </a>
+        </div>
+        <div class="card-body">
+            {% if issues %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Created By</th>
+                                <th>Assigned To</th>
+                                <th>Created At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for issue in issues %}
+                                <tr onclick="window.location='{% url 'issue-detail' issue.pk %}'" style="cursor: pointer;">
+                                    <td>{{ issue.title }}</td>
+                                    <td>{{ issue.category.name }}</td>
+                                    <td>
+                                        {% if issue.status == 'pending' %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% elif issue.status == 'in_progress' %}
+                                            <span class="badge bg-info">In Progress</span>
+                                        {% elif issue.status == 'resolved' %}
+                                            <span class="badge bg-success">Resolved</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Closed</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if issue.priority == 'urgent' %}
+                                            <span class="badge bg-danger">Urgent</span>
+                                        {% elif issue.priority == 'high' %}
+                                            <span class="badge bg-warning">High</span>
+                                        {% elif issue.priority == 'medium' %}
+                                            <span class="badge bg-info">Medium</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Low</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ issue.created_by.get_full_name|default:issue.created_by.username }}</td>
+                                    <td>{{ issue.assigned_to.get_full_name|default:issue.assigned_to.username|default:"-" }}</td>
+                                    <td>{{ issue.created_at|date:"M d, Y" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <p class="text-muted text-center my-5">No issues found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

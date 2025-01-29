@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-clock me-2"></i>Pending Issues
+                    </h5>
+                    <h2 class="display-4">{{ pending_issues }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-spinner me-2"></i>In Progress
+                    </h5>
+                    <h2 class="display-4">{{ in_progress_issues }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-check-circle me-2"></i>Resolved
+                    </h5>
+                    <h2 class="display-4">{{ resolved_issues }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Issues and Assigned Issues -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list-ul me-2"></i>My Issues
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if my_issues %}
+                        <div class="list-group">
+                            {% for issue in my_issues %}
+                                <a href="{% url 'issue-detail' issue.pk %}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ issue.title }}</h6>
+                                        <small>
+                                            {% if issue.status == 'pending' %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% elif issue.status == 'in_progress' %}
+                                                <span class="badge bg-info">In Progress</span>
+                                            {% elif issue.status == 'resolved' %}
+                                                <span class="badge bg-success">Resolved</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Closed</span>
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <small class="text-muted">Created {{ issue.created_at|timesince }} ago</small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center my-3">No issues created yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tasks me-2"></i>Assigned to Me
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if assigned_issues %}
+                        <div class="list-group">
+                            {% for issue in assigned_issues %}
+                                <a href="{% url 'issue-detail' issue.pk %}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ issue.title }}</h6>
+                                        <small>
+                                            {% if issue.priority == 'urgent' %}
+                                                <span class="badge bg-danger">Urgent</span>
+                                            {% elif issue.priority == 'high' %}
+                                                <span class="badge bg-warning">High</span>
+                                            {% elif issue.priority == 'medium' %}
+                                                <span class="badge bg-info">Medium</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Low</span>
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <small class="text-muted">Updated {{ issue.updated_at|timesince }} ago</small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center my-3">No issues assigned to you.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

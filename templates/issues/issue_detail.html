@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ issue.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main Issue Content -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ issue.title }}</h5>
+                    {% if issue.created_by == user %}
+                        <a href="{% url 'issue-update' issue.pk %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-edit me-2"></i>Edit
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">Description</h6>
+                        <p>{{ issue.description|linebreaks }}</p>
+                    </div>
+                    
+                    {% if issue.attachment %}
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">Attachment</h6>
+                            <a href="{{ issue.attachment.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                <i class="fas fa-paperclip me-2"></i>View Attachment
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    <!-- Comments Section -->
+                    <div class="mt-5">
+                        <h5 class="mb-4">
+                            <i class="fas fa-comments me-2"></i>Comments
+                        </h5>
+                        
+                        <!-- New Comment Form -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <form method="post" action="{% url 'add-comment' issue.pk %}" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    {{ comment_form|crispy }}
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane me-2"></i>Add Comment
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Comments List -->
+                        {% for comment in issue.comments.all %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-user me-2"></i>{{ comment.author.get_full_name|default:comment.author.username }}
+                                        </h6>
+                                        <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                                    </div>
+                                    <p class="mb-2">{{ comment.content|linebreaks }}</p>
+                                    {% if comment.attachment %}
+                                        <a href="{{ comment.attachment.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                            <i class="fas fa-paperclip me-2"></i>View Attachment
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted text-center">No comments yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Issue Details Sidebar -->
+        <div class="col-md-4">
+            <!-- Status and Assignment -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Issue Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'update-status' issue.pk %}">
+                        {% csrf_token %}
+                        {{ status_form|crispy }}
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-save me-2"></i>Update
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Issue Information -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clipboard me-2"></i>Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Category</span>
+                            <span class="badge bg-primary">{{ issue.category.name }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Status</span>
+                            {% if issue.status == 'pending' %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% elif issue.status == 'in_progress' %}
+                                <span class="badge bg-info">In Progress</span>
+                            {% elif issue.status == 'resolved' %}
+                                <span class="badge bg-success">Resolved</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Closed</span>
+                            {% endif %}
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Priority</span>
+                            {% if issue.priority == 'urgent' %}
+                                <span class="badge bg-danger">Urgent</span>
+                            {% elif issue.priority == 'high' %}
+                                <span class="badge bg-warning">High</span>
+                            {% elif issue.priority == 'medium' %}
+                                <span class="badge bg-info">Medium</span>
+                            {% else %}
+                                <span class="badge bg-success">Low</span>
+                            {% endif %}
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Created By</span>
+                            <span>{{ issue.created_by.get_full_name|default:issue.created_by.username }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Created At</span>
+                            <span>{{ issue.created_at|date:"M d, Y H:i" }}</span>
+                        </li>
+                        {% if issue.resolved_at %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Resolved At</span>
+                                <span>{{ issue.resolved_at|date:"M d, Y H:i" }}</span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Issue History -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>History
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for history in issue.history.all %}
+                            <div class="mb-3">
+                                <small class="text-muted d-block">{{ history.timestamp|date:"M d, Y H:i" }}</small>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-circle text-primary me-2" style="font-size: 0.5rem;"></i>
+                                    <span>{{ history.action }}</span>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted text-center">No history available.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

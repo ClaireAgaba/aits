@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ department.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">{{ department.name }}</h1>
+        <div>
+            <a href="{% url 'department-update' department.pk %}" class="btn btn-primary">
+                <i class="fas fa-edit me-2"></i>Edit Department
+            </a>
+            <a href="{% url 'department-list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Department Info -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Department Information</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Code:</dt>
+                        <dd class="col-sm-8">{{ department.code }}</dd>
+                        
+                        <dt class="col-sm-4">HOD:</dt>
+                        <dd class="col-sm-8">
+                            {% if department.head_of_department %}
+                                {{ department.head_of_department.get_full_name }}
+                            {% else %}
+                                <span class="text-muted">Not assigned</span>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Created:</dt>
+                        <dd class="col-sm-8">{{ department.created_at|date:"M d, Y" }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Courses -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Courses</h5>
+                    <a href="{% url 'course-create' %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add Course
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if courses %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Name</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for course in courses %}
+                                    <tr>
+                                        <td>{{ course.code }}</td>
+                                        <td>{{ course.name }}</td>
+                                        <td>
+                                            <a href="{% url 'course-update' course.pk %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center my-3">No courses found for this department.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Lecturers -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Lecturers</h5>
+                </div>
+                <div class="card-body">
+                    {% if lecturers %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for lecturer in lecturers %}
+                                    <tr>
+                                        <td>{{ lecturer.get_full_name }}</td>
+                                        <td>{{ lecturer.email }}</td>
+                                        <td>
+                                            {% if lecturer == department.head_of_department %}
+                                                <span class="badge bg-primary">HOD</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Lecturer</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center my-3">No lecturers assigned to this department.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
