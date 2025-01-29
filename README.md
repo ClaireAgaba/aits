@@ -90,4 +90,4 @@ python manage.py runserver
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Makerere University Academic Issue Tracking System (AITS) is released under the [MIT License](https://github.com/ClaireAgaba/aits/blob/main/LICENSE).
